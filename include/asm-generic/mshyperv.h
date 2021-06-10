@@ -233,7 +233,7 @@ static inline bool hyperv_query_ext_cap(u64 cap_to_query)
 	 * Querying extended capabilities is done via an extended hypercall.
 	 * Check if the partition supports extended hypercall, first.
 	 */
-	if (!(ms_hyperv.priv_high & HV_ENABLE_EXTENDED_HYPERCALLS)) {
+	if (!(ms_hyperv.features_b & HV_ENABLE_EXTENDED_HYPERCALLS)) {
 		pr_info("Hyper-V doesn't support extended hypercalls\n");
 		return 0;
 	}
