@@ -13,6 +13,7 @@
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
 #include <linux/hyperv.h>
+#include <linux/version.h>
 #include <linux/random.h>
 #include <linux/clockchips.h>
 #include <linux/delay.h>
@@ -105,7 +106,7 @@ int hv_post_message(union hv_connection_id connection_id,
 	 */
 	put_cpu_ptr(hv_cpu);
 
-	return hv_result(status);
+	return status & 0xFFFF;
 }
 
 int hv_synic_alloc(void)
@@ -344,7 +345,8 @@ int hv_synic_cleanup(unsigned int cpu)
 	 * path where the vmbus is already disconnected, the CPU must be
 	 * allowed to shut down.
 	 */
-	if (cpu == VMBUS_CONNECT_CPU)
+	if (cpu == VMBUS_CONNECT_CPU &&
+	    vmbus_connection.conn_state == CONNECTED)
 		return -EBUSY;
 
 	/*
@@ -371,7 +373,7 @@ int hv_synic_cleanup(unsigned int cpu)
 	}
 	mutex_unlock(&vmbus_connection.channel_mutex);
 
-	if (channel_found)
+	if (channel_found && vmbus_connection.conn_state == CONNECTED)
 		return -EBUSY;
 
 	/*
